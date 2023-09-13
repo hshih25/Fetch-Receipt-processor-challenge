@@ -49,7 +49,7 @@ npm run dev
 ### Get Points
 
     curl -X GET 
-    http://localhost:3000/:id/points
+    http://localhost:3000/receipts/{id}/points
         -H 'Content-Type: application/json' 
 
 ### Response
