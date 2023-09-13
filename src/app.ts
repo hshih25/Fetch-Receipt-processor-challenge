@@ -79,12 +79,12 @@ app.post('/receipts/process', (req, res) => {
 app.get('/receipts/:id/points', (req, res) => {
   const id = req.params.id;
   if (!id) {
-    res.status(400).json({'description': 'No receipt found for that id'});
+    res.status(404).json({'description': 'No receipt found for that id'});
     return;
   }
   const points: number = database.get(id);
   if (!points) {
-    res.status(400).json({'description': 'No receipt found for that id'});
+    res.status(404).json({'description': 'No receipt found for that id'});
     return;
   }
   const jsonData = {
