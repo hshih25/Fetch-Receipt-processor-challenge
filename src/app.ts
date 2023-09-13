@@ -4,8 +4,16 @@ const app = express();
 const port = 3000;
 app.use(express.json());
 const database = new Map<string, number>();
-
-
+const regexpDescription = new RegExp('^[\\w\\s\\-]+$');
+const regexpPrice = new RegExp('^\\d+\\.\\d{2}$');
+const regexNormal = new RegExp('^\\S+$')
+interface Receipt {
+  retailer: string;
+  purchaseDate: string;
+  purchaseTime: string;
+  items: Array<Item>;
+  total: string;
+}
 
 interface Item {
   shortDescription: string;
@@ -13,57 +21,70 @@ interface Item {
 }
 
 app.post('/receipts/process', (req, res) => {
-  const data = req.body;
-  if(!data) {
-    res.status(400).json({"error": "Receipt not found"});
+  if(!req.body) {
+    res.status(400).json({"description": "The receipt is invalid"});
+    return;
+  }
+  const data = req.body as Receipt;
+  if (!matchPatterns(data)) {
+    res.status(400).json({"description": "The receipt is invalid"});
     return;
   }
 
-  let points : number = 0;
   const retailer = data.retailer;
   const date = data.purchaseDate;
   const time = data.purchaseTime;
   const total = (data.total)? parseFloat(data.total) : undefined;
   const items = data.items;
-
-  if (!retailer || !date || !time || !total || !items) {
-    res.status(400).json({"error": "Receipt data discrepancy"});
-    return;
-  }
+  
   // alphanumeric character points
-  points += countAlphabet(retailer);
+  const alphabetPoints = countAlphabet(retailer);
+  console.log('alphabet points: ' + alphabetPoints);
 
   // round dollar amount points
-  points += isRounded(total)? 50 : 0;
+  const roundedDollarPoints = isRounded(total)? 50 : 0;
+  console.log('round dollar amount points: ' + roundedDollarPoints);
 
   // total is a multiple of 0.25 points
-  points += (total && total * 100 % 25 == 0)? 25 : 0;
+  const multipleOfQuaterPoints = (total && total * 100 % 25 == 0)? 25 : 0;
+  console.log('multiple of 0.25 points: ' + multipleOfQuaterPoints);
 
   // items points
-  points += (total)? Math.floor(items.length / 2) * 5 : 0;
+  const itemsPoints = (total)? Math.floor(items.length / 2) * 5 : 0;
+  console.log('items points: ' + itemsPoints);
 
   // Odd day points
-  points += isOddDay(date)? 6 : 0;
+  const oddDayPoints = isOddDay(date)? 6 : 0;
+  console.log('Odd day points: ' + oddDayPoints);
 
   // Trimmed length points
-  points += lengthPoints(items);
+  const trimmedLengthPoints = lengthPoints(items)
+  console.log('Trimmed length points: ' + trimmedLengthPoints);
   
   // Time points
-  points += timePoints(time);
+  const timeInRangePoints = timePoints(time);
+  console.log('Time points: ' + timeInRangePoints);
 
+
+  const points = alphabetPoints + roundedDollarPoints + multipleOfQuaterPoints + itemsPoints + oddDayPoints + trimmedLengthPoints + timeInRangePoints;
   const id: string = generateRandomID();
+
   database.set(id, points);
   const jsonData = {
-    id: id
+    'id': id
   };
   res.status(200).json(jsonData);
 });
 
 app.get('/receipts/:id/points', (req, res) => {
   const id = req.params.id;
+  if (!id) {
+    res.status(400).json({'description': 'No receipt found for that id'});
+    return;
+  }
   const points: number = database.get(id);
   if (!points) {
-    res.status(400).json({error: "ID not exist"});
+    res.status(400).json({'description': 'No receipt found for that id'});
     return;
   }
   const jsonData = {
@@ -79,6 +100,7 @@ function generateRandomID(): string {
     const randomIndex = Math.floor(Math.random() * characters.length);
     result += characters.charAt(randomIndex);
   }
+
   return result;
 }
 
@@ -96,11 +118,25 @@ function lengthPoints(items: Array<Item>): number {
     const price = parseFloat(items[i].price);
     if (shortDescription.length % 3 == 0) {
       points += Math.ceil(price * 0.2);
-      console.log(Math.ceil(price * 0.2));
     }
   }
 
   return points;
+}
+
+function matchPatterns(data: Receipt): boolean {
+  if (!data.retailer || !data.total || !data.purchaseTime || !data.purchaseDate || !data.items)
+    return false;
+  
+
+  for (let i = 0; i < data.items.length; i++) {
+    const shortDescription = data.items[i].shortDescription;
+    const price = data.items[i].price;
+    if (!regexpDescription.test(shortDescription) || !regexpPrice.test(price))
+      return false;
+  }
+  // The pattern wrote said reatailer should match ^\\S+$ but it seems not in the test cases
+  return regexpPrice.test(data.total);
 }
 
 function isOddDay(date: string): boolean {
