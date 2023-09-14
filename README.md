@@ -10,6 +10,8 @@ Start from building and running the docker image by following command. If it suc
     docker run -d -p 3000:3000 ts-node-docker
 ```
 
+It should like this if it is successful.
+![Alt text](Capture.PNG)
 
 ## Endpoints 
 
