@@ -2,7 +2,7 @@
 
 ## Environment setup
 
-Start from building and running the docker image by following command.
+Start from building and running the docker image by following command. If it success, then the backend code is working. 
 
 
 ```sh
