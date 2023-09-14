@@ -2,30 +2,13 @@
 
 ## Environment setup
 
-You need to have
-[Node.js](https://nodejs.org/)
-installed on your computer.
+Start from building and running the docker image by following command.
 
-Verify the tools by running the following commands:
 
 ```sh
-node --version
-npm --version
+ docker compose -f docker-compose.yml up 
 ```
 
-After the tools installation, please run the follwoing command to install the packages needed.
-
-```sh
-npm install
-```
-
-## Run the Server
-
-Please execute the following command in the terminal to run the server.
-
-```sh
-npm run dev
-```
 
 ## Endpoints 
 
