@@ -1,4 +1,3 @@
-import { count } from 'console';
 import express from 'express';
 const app = express();
 const port = 3000;

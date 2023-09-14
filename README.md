@@ -6,7 +6,8 @@ Start from building and running the docker image by following command.
 
 
 ```sh
- docker compose -f docker-compose.yml up 
+    docker build --tag ts-node-docker --network=host .
+    docker run -d -p 3000:3000 ts-node-docker
 ```
 
 
